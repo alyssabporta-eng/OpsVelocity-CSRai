@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpsVelocity OS — CSR Agent Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:       #060D1A;
+  --navy2:      #0A1628;
+  --navy3:      #0F1F38;
+  --navy4:      #152540;
+  --blue:       #2E9BF5;
+  --blue-dim:   #1A6FBF;
+  --blue-glow:  rgba(46,155,245,0.12);
+  --blue-line:  rgba(46,155,245,0.28);
+  --blue-bright:#5BB8FF;
+  --silver:     #C8D4E0;
+  --silver-dim: #8899AA;
+  --white:      #FFFFFF;
+  --muted:      #5A7090;
+  --muted2:     #3A5070;
+  --border:     rgba(46,155,245,0.12);
+  --border2:    rgba(46,155,245,0.22);
+  --border3:    rgba(200,212,224,0.1);
+  --success:    #22D87A;
+  --glow-line:  rgba(46,155,245,0.5);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--navy);
+  color: var(--silver);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* circuit pattern background */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(46,155,245,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(46,155,245,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events:none;
+  z-index:0;
+}
+
+.app { position:relative; z-index:1; }
+
+/* ── HEADER ── */
+.header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 28px;
+  border-bottom:1px solid var(--border2);
+  background:rgba(6,13,26,0.92);
+  backdrop-filter:blur(12px);
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+
+.logo {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+/* SVG logo mark — circuit arrow + house */
+.logo-text {
+  font-family:'Rajdhani',sans-serif;
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:0.04em;
+  line-height:1;
+}
+
+.logo-ops { color:var(--silver); }
+.logo-vel { color:var(--blue); }
+.logo-os  { color:var(--silver-dim); font-size:18px; margin-left:2px; }
+
+.logo-sub {
+  font-size:10px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-top:2px;
+  font-family:'Rajdhani',sans-serif;
+  font-weight:500;
+}
+
+.header-right {
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.header-badge {
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--blue);
+  border:1px solid var(--border2);
+  padding:4px 10px;
+  border-radius:2px;
+  background:var(--blue-glow);
+}
+
+/* ── PROGRESS ── */
+.progress-strip { height:2px; background:var(--navy3); position:relative; }
+.progress-fill  { height:2px; background:linear-gradient(90deg,var(--blue-dim),var(--blue-bright)); transition:width .4s ease; width:0%; }
+
+/* ── SCREENS ── */
+.screen { display:none; }
+.screen.active { display:block; }
+
+/* ── INTRO ── */
+.intro-wrap {
+  max-width:700px;
+  margin:0 auto;
+  padding:56px 24px 80px;
+}
+
+.eyebrow {
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--blue);
+  margin-bottom:18px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.eyebrow::before {
+  content:'';
+  display:inline-block;
+  width:24px;
+  height:1px;
+  background:var(--blue);
+}
+
+.intro-title {
+  font-family:'Rajdhani',sans-serif;
+  font-size:clamp(44px,7vw,68px);
+  font-weight:700;
+  line-height:1.0;
+  letter-spacing:0.02em;
+  color:var(--white);
+  margin-bottom:20px;
+}
+
+.intro-title .accent { color:var(--blue); }
+.intro-title .dim    { color:var(--silver-dim); }
+
+.intro-body {
+  font-size:15px;
+  color:var(--silver-dim);
+  line-height:1.75;
+  margin-bottom:40px;
+  max-width:520px;
+}
+
+/* glow line */
+.glow-rule {
+  height:1px;
+  background:linear-gradient(90deg,var(--blue),transparent);
+  margin:32px 0;
+  opacity:0.4;
+}
+
+.layer-chips {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:36px;
+}
+
+.chip {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  background:var(--navy3);
+  border:1px solid var(--border2);
+  border-radius:2px;
+  padding:6px 12px;
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:0.05em;
+  color:var(--silver-dim);
+}
+
+.chip-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+
+/* context form */
+.context-card {
+  background:var(--navy2);
+  border:1px solid var(--border2);
+  border-radius:4px;
+  padding:24px;
+  margin-bottom:28px;
+}
+
+.context-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+
+@media(max-width:500px){ .context-grid{grid-template-columns:1fr} }
+
+.field-wrap { display:flex; flex-direction:column; gap:6px; }
+
+.field-label {
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+input[type="text"] {
+  background:var(--navy3);
+  border:1px solid var(--border3);
+  border-radius:3px;
+  color:var(--white);
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+  padding:10px 14px;
+  outline:none;
+  transition:border-color .2s;
+  width:100%;
+}
+
+input[type="text"]:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(46,155,245,0.08); }
+input[type="text"]::placeholder { color:var(--muted2); }
+
+.trade-select { display:flex; gap:8px; flex-wrap:wrap; }
+
+.trade-btn {
+  background:var(--navy3);
+  border:1px solid var(--border3);
+  border-radius:2px;
+  color:var(--muted);
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:0.06em;
+  padding:8px 14px;
+  cursor:pointer;
+  transition:all .15s;
+}
+
+.trade-btn.selected {
+  background:var(--blue-glow);
+  border-color:var(--blue);
+  color:var(--blue-bright);
+}
+
+.btn-primary {
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  background:linear-gradient(135deg,var(--blue-dim),var(--blue));
+  border:none;
+  border-radius:3px;
+  color:var(--white);
+  font-family:'Rajdhani',sans-serif;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  padding:13px 28px;
+  cursor:pointer;
+  transition:opacity .15s;
+  position:relative;
+  overflow:hidden;
+}
+
+.btn-primary::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,0.08),transparent);
+}
+
+.btn-primary:hover { opacity:.88; }
+.btn-primary:disabled { opacity:.35; cursor:not-allowed; }
+
+.btn-ghost {
+  background:transparent;
+  border:1px solid var(--border2);
+  border-radius:3px;
+  color:var(--silver-dim);
+  font-family:'Rajdhani',sans-serif;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  padding:11px 20px;
+  cursor:pointer;
+  transition:all .15s;
+}
+
+.btn-ghost:hover { border-color:var(--blue-dim); color:var(--silver); }
+
+/* ── SURVEY ── */
+.survey-wrap {
+  max-width:700px;
+  margin:0 auto;
+  padding:40px 24px 100px;
+}
+
+/* layer transition */
+.layer-transition {
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  padding:80px 24px;
+  animation:fadeUp .4s ease;
+}
+
+.layer-transition.active { display:flex; }
+
+.lt-badge {
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--blue);
+  background:var(--blue-glow);
+  border:1px solid var(--border2);
+  padding:5px 14px;
+  border-radius:2px;
+  margin-bottom:20px;
+}
+
+.lt-num {
+  font-family:'Rajdhani',sans-serif;
+  font-size:90px;
+  font-weight:700;
+  color:var(--blue);
+  line-height:1;
+  margin-bottom:10px;
+  text-shadow:0 0 40px rgba(46,155,245,0.3);
+}
+
+.lt-title {
+  font-family:'Rajdhani',sans-serif;
+  font-size:30px;
+  font-weight:700;
+  color:var(--white);
+  letter-spacing:0.03em;
+  margin-bottom:8px;
+}
+
+.lt-sub {
+  font-size:15px;
+  color:var(--silver-dim);
+  margin-bottom:40px;
+}
+
+/* question */
+.q-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:6px;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.layer-tag {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.layer-num {
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--blue);
+  background:var(--blue-glow);
+  border:1px solid var(--border2);
+  padding:3px 9px;
+  border-radius:2px;
+}
+
+.layer-name {
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+.q-counter {
+  font-size:12px;
+  color:var(--muted);
+}
+.q-counter span { color:var(--silver); font-weight:500; }
+
+.q-text {
+  font-family:'Rajdhani',sans-serif;
+  font-size:clamp(22px,4vw,32px);
+  font-weight:600;
+  line-height:1.2;
+  color:var(--white);
+  margin:18px 0 12px;
+  letter-spacing:0.01em;
+}
+
+.q-hint {
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:24px;
+  line-height:1.65;
+  padding:10px 14px;
+  border-left:2px solid var(--blue-dim);
+  background:var(--blue-glow);
+  border-radius:0 3px 3px 0;
+}
+
+.q-hint strong { color:var(--blue-bright); font-weight:500; }
+
+/* mode bar */
+.answer-mode-bar {
+  display:flex;
+  gap:6px;
+  margin-bottom:14px;
+}
+
+.mode-btn {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  background:var(--navy3);
+  border:1px solid var(--border3);
+  border-radius:2px;
+  color:var(--muted);
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  padding:7px 12px;
+  cursor:pointer;
+  transition:all .15s;
+}
+
+.mode-btn.active {
+  background:var(--blue-glow);
+  border-color:var(--blue);
+  color:var(--blue-bright);
+}
+
+.mode-icon { width:14px; height:14px; flex-shrink:0; }
+
+textarea.answer-field {
+  width:100%;
+  background:var(--navy2);
+  border:1px solid var(--border3);
+  border-radius:3px;
+  color:var(--white);
+  font-family:'Inter',sans-serif;
+  font-size:15px;
+  line-height:1.7;
+  padding:16px;
+  resize:vertical;
+  min-height:130px;
+  outline:none;
+  transition:border-color .2s;
+}
+
+textarea.answer-field:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(46,155,245,0.07); }
+textarea.answer-field::placeholder { color:var(--muted2); }
+
+/* voice panel */
+.voice-panel {
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  gap:16px;
+  background:var(--navy2);
+  border:1px solid var(--border2);
+  border-radius:4px;
+  padding:36px 24px;
+}
+
+.voice-panel.open { display:flex; }
+
+.mic-btn {
+  width:76px;
+  height:76px;
+  border-radius:50%;
+  background:var(--navy3);
+  border:2px solid var(--border2);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all .2s;
+}
+
+.mic-btn.recording {
+  border-color:var(--blue);
+  background:var(--blue-glow);
+  animation:pulse 1.6s infinite;
+}
+
+@keyframes pulse {
+  0%,100% { box-shadow:0 0 0 0 rgba(46,155,245,0.5); }
+  50%      { box-shadow:0 0 0 16px rgba(46,155,245,0); }
+}
+
+.mic-svg { width:30px; height:30px; }
+
+.voice-status {
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+.voice-status.active { color:var(--blue-bright); }
+
+.voice-preview {
+  font-size:14px;
+  color:var(--silver-dim);
+  line-height:1.65;
+  text-align:center;
+  max-width:440px;
+  min-height:44px;
+}
+
+.voice-tip {
+  font-size:12px;
+  color:var(--muted);
+  text-align:center;
+  line-height:1.55;
+}
+
+/* nav */
+.nav-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:22px;
+  gap:12px;
+}
+
+.skip-link {
+  font-size:13px;
+  color:var(--muted);
+  cursor:pointer;
+  text-decoration:underline;
+  text-underline-offset:3px;
+  background:none;
+  border:none;
+  padding:0;
+  font-family:'Inter',sans-serif;
+}
+
+/* ── SUBMIT ── */
+.submit-wrap {
+  max-width:700px;
+  margin:0 auto;
+  padding:56px 24px 80px;
+  animation:fadeUp .35s ease;
+}
+
+.section-title {
+  font-family:'Rajdhani',sans-serif;
+  font-size:clamp(32px,5vw,44px);
+  font-weight:700;
+  color:var(--white);
+  letter-spacing:0.02em;
+  margin-bottom:10px;
+}
+
+.submit-grid { display:grid; gap:8px; margin-bottom:28px; }
+
+.submit-row {
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  background:var(--navy2);
+  border:1px solid var(--border3);
+  border-radius:3px;
+  padding:14px 16px;
+}
+
+.submit-dot {
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  margin-top:5px;
+  flex-shrink:0;
+}
+
+.submit-lbl {
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:3px;
+}
+
+.submit-val { font-size:14px; color:var(--silver); line-height:1.5; }
+.submit-val.empty { color:var(--muted2); font-style:italic; }
+
+.divider { border:none; border-top:1px solid var(--border); margin:28px 0; }
+
+/* ── DONE ── */
+.done-wrap {
+  max-width:560px;
+  margin:0 auto;
+  padding:80px 24px;
+  text-align:center;
+  animation:fadeUp .4s ease;
+}
+
+.done-mark {
+  width:68px;
+  height:68px;
+  border-radius:50%;
+  background:rgba(34,216,122,0.08);
+  border:2px solid var(--success);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto 28px;
+}
+
+/* ── FOOTER ── */
+.footer {
+  border-top:1px solid var(--border);
+  padding:18px 28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:8px;
+  position:relative;
+  z-index:1;
+}
+
+.footer-logo {
+  font-family:'Rajdhani',sans-serif;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:0.06em;
+  color:var(--muted2);
+}
+
+.footer-logo span { color:var(--blue-dim); }
+.footer-text { font-size:12px; color:var(--muted2); letter-spacing:0.04em; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.fade-in { animation:fadeUp .4s ease forwards; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+
+    <div>
+      <div class="logo-text">
+        <span class="logo-ops">Ops</span><span class="logo-vel">Velocity</span><span class="logo-os"> OS</span>
+      </div>
+      <div class="logo-sub">CSR Agent Builder</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-badge">GM Survey</div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-strip">
+  <div class="progress-fill" id="progress-fill"></div>
+</div>
+
+<!-- ══ INTRO ══ -->
+<div class="screen active" id="screen-intro">
+  <div class="intro-wrap fade-in">
+    <h1 class="intro-title">
+      Build your<br>
+      <span class="accent">CSR Agent</span><br>
+      <span class="dim">foundation.</span>
+    </h1>
+    <p class="intro-body">This 25-question survey captures everything needed to build a top-performing inbound call center AI agent for your brand. Answer by voice or text — takes 15–20 minutes.</p>
+
+    <div class="layer-chips">
+      <div class="chip"><div class="chip-dot" style="background:#2E9BF5"></div>Voice &amp; Tone</div>
+      <div class="chip"><div class="chip-dot" style="background:#5BB8FF"></div>Objection Handling</div>
+      <div class="chip"><div class="chip-dot" style="background:#8899AA"></div>Booking Logic</div>
+      <div class="chip"><div class="chip-dot" style="background:#1A6FBF"></div>Job Knowledge</div>
+      <div class="chip"><div class="chip-dot" style="background:#C8D4E0"></div>Culture &amp; Values</div>
+    </div>
+
+    <div class="context-card">
+      <div class="eyebrow" style="margin-bottom:18px;">Your company info</div>
+      <div class="context-grid">
+        <div class="field-wrap">
+          <label class="field-label">Company / Brand</label>
+          <input type="text" id="co-name" placeholder="e.g. Apex HVAC">
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Your Name</label>
+          <input type="text" id="gm-name" placeholder="e.g. Mike Torres">
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Market / Region</label>
+          <input type="text" id="co-market" placeholder="e.g. Dallas-Fort Worth">
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Primary Trade</label>
+          <div class="trade-select" id="trade-select">
+            <button class="trade-btn" onclick="selectTrade(this,'HVAC')">HVAC</button>
+            <button class="trade-btn" onclick="selectTrade(this,'Plumbing')">Plumbing</button>
+            <button class="trade-btn" onclick="selectTrade(this,'Electrical')">Electrical</button>
+            <button class="trade-btn" onclick="selectTrade(this,'Multi')">Multi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="startSurvey()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M9 4l4 4-4 4" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Begin Survey
+    </button>
+  </div>
+</div>
+
+<!-- ══ SURVEY ══ -->
+<div class="screen" id="screen-survey">
+  <div class="survey-wrap">
+
+    <!-- layer transition -->
+    <div class="layer-transition" id="layer-transition">
+      <div class="lt-badge" id="lt-badge">Layer 1 of 5</div>
+      <div class="lt-num" id="lt-num">L1</div>
+      <div class="lt-title" id="lt-title">Voice &amp; Tone</div>
+      <div class="lt-sub" id="lt-sub">How this company sounds on every call</div>
+      <button class="btn-primary" onclick="dismissTransition()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M8 3l4 4-4 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Start This Layer
+      </button>
+    </div>
+
+    <!-- question -->
+    <div id="q-card" style="display:none;">
+      <div class="q-header">
+        <div class="layer-tag">
+          <div class="layer-num" id="q-layer-num">L1</div>
+          <div class="layer-name" id="q-layer-name">Voice &amp; Tone</div>
+        </div>
+        <div class="q-counter">Question <span id="q-of">1 of 25</span></div>
+      </div>
+
+      <div class="q-text" id="q-text"></div>
+      <div class="q-hint" id="q-hint"></div>
+
+      <div class="answer-mode-bar">
+        <button class="mode-btn active" id="mode-text-btn" onclick="setMode('text')">
+          <svg class="mode-icon" viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="2" rx="1" fill="currentColor"/><rect x="1" y="6" width="9" height="2" rx="1" fill="currentColor"/><rect x="1" y="10" width="11" height="2" rx="1" fill="currentColor"/></svg>
+          Type
+        </button>
+        <button class="mode-btn" id="mode-voice-btn" onclick="setMode('voice')">
+          <svg class="mode-icon" viewBox="0 0 14 14" fill="none"><rect x="4" y="1" width="6" height="8" rx="3" fill="currentColor"/><path d="M2 7c0 2.76 2.24 5 5 5s5-2.24 5-5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="7" y1="12" x2="7" y2="13.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Voice
+        </button>
+      </div>
+
+      <div id="text-mode">
+        <textarea class="answer-field" id="answer-field" placeholder="Type your answer here — or use voice mode on mobile..."></textarea>
+      </div>
+
+      <div class="voice-panel" id="voice-panel">
+        <div class="mic-btn" id="mic-btn" onclick="toggleRecording()">
+          <svg class="mic-svg" viewBox="0 0 30 30" fill="none">
+            <rect x="9" y="2" width="12" height="16" rx="6" fill="#2E9BF5"/>
+            <path d="M4 14c0 6.07 4.93 11 11 11s11-4.93 11-11" stroke="#5BB8FF" stroke-width="2" stroke-linecap="round"/>
+            <line x1="15" y1="25" x2="15" y2="29" stroke="#5BB8FF" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="voice-status" id="voice-status">Tap to record</div>
+        <div class="voice-preview" id="voice-preview">Your spoken answer will appear here...</div>
+        <div class="voice-tip">Speak naturally · Tap again to stop<br>Best on iPhone — use keyboard mic or this button</div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn-ghost" onclick="goBack()" id="back-btn">← Back</button>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <button class="skip-link" onclick="skipQuestion()">Skip</button>
+          <button class="btn-primary" onclick="nextQuestion()" id="next-btn">
+            Next
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M8 3l4 4-4 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ SUBMIT ══ -->
+<div class="screen" id="screen-submit">
+  <div class="submit-wrap">
+    <div class="eyebrow">All 25 questions complete</div>
+    <div class="section-title">Review &amp; submit</div>
+    <p style="font-size:15px;color:var(--silver-dim);margin-bottom:28px;line-height:1.7;">Your responses are sent directly to OpsVelocity OS for AI extraction and CSR agent profile generation.</p>
+
+    <div class="submit-grid" id="submit-preview"></div>
+
+    <hr class="divider">
+
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:24px;max-width:380px;">
+      <label class="field-label">Your email — optional, receive a copy</label>
+      <input type="text" id="gm-email" placeholder="you@company.com">
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn-primary" onclick="submitSurvey()" id="submit-btn">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2 7.5l4 4 7-7" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Submit to OpsVelocity
+      </button>
+      <button class="btn-ghost" onclick="goToSurvey()">← Edit answers</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DONE ══ -->
+<div class="screen" id="screen-done">
+  <div style="max-width:700px;margin:0 auto;padding:56px 24px 80px;animation:fadeUp .4s ease;">
+
+    <!-- success mark + headline -->
+    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:48px;">
+      <div style="width:68px;height:68px;border-radius:50%;background:rgba(34,216,122,0.08);border:2px solid #22D87A;display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none"><path d="M5 15l8 8 12-12" stroke="#22D87A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="eyebrow" style="justify-content:center;margin-bottom:8px;">Survey complete</div>
+      <div class="section-title">Your responses<br>are submitted.</div>
+      <p style="font-size:15px;color:var(--silver-dim);margin-top:14px;line-height:1.75;max-width:480px;">Download your PDF copy below — this document is the raw material that will be used to build the AI brain of your inbound call center agent.</p>
+      <button class="btn-primary" id="pdf-btn" onclick="downloadPDF()" style="margin-top:24px;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Download PDF Copy
+      </button>
+    </div>
+
+    <!-- divider -->
+    <div style="height:1px;background:linear-gradient(90deg,var(--blue-dim),transparent);opacity:0.3;margin-bottom:40px;"></div>
+
+    <!-- what this document is -->
+    <div style="margin-bottom:36px;">
+      <div class="eyebrow" style="margin-bottom:14px;">What this document is</div>
+      <p style="font-size:15px;color:var(--silver-dim);line-height:1.85;margin-bottom:14px;">
+        You just captured the institutional knowledge that lives in your best CSRs' heads — the tone, the scripts, the objection handling, the booking logic, the culture. That knowledge has never been written down in one place before. It is now.
+      </p>
+      <p style="font-size:15px;color:var(--silver-dim);line-height:1.85;">
+        This PDF is your <span style="color:var(--silver);font-weight:500;">5-Layer CSR Foundation Document</span> — the structured input your AI implementation partner needs to build an agent that sounds, thinks, and performs like your top human CSR, not a generic chatbot.
+      </p>
+    </div>
+
+    <!-- how to use it - steps -->
+    <div style="margin-bottom:36px;">
+      <div class="eyebrow" style="margin-bottom:16px;">How to use it with your AI partner</div>
+      <div style="display:grid;gap:10px;">
+
+        <div style="display:flex;gap:16px;background:var(--navy2);border:1px solid var(--border2);border-radius:4px;padding:18px 20px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--blue-glow);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--blue);flex-shrink:0;">1</div>
+          <div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.06em;color:var(--silver);margin-bottom:5px;">SEND THE PDF TO YOUR AI IMPLEMENTATION PARTNER</div>
+            <div style="font-size:14px;color:var(--silver-dim);line-height:1.7;">Forward this document to OpsVelocity or your designated AI vendor before any build session. It replaces hours of back-and-forth discovery calls — everything they need to understand your brand's call center identity is already here.</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:16px;background:var(--navy2);border:1px solid var(--border2);border-radius:4px;padding:18px 20px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--blue-glow);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--blue);flex-shrink:0;">2</div>
+          <div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.06em;color:var(--silver);margin-bottom:5px;">THE AI EXTRACTS YOUR 5 FOUNDATIONAL LAYERS</div>
+            <div style="font-size:14px;color:var(--silver-dim);line-height:1.7;">Your answers are processed through the OpsVelocity AI extraction engine. Each of the 5 layers — Voice &amp; Tone, Objection Handling, Booking Logic, Job Knowledge, and Culture — becomes a dedicated module in your agent's system prompt. Your words become the agent's instructions.</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:16px;background:var(--navy2);border:1px solid var(--border2);border-radius:4px;padding:18px 20px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--blue-glow);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--blue);flex-shrink:0;">3</div>
+          <div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.06em;color:var(--silver);margin-bottom:5px;">A SYSTEM PROMPT LIBRARY IS BUILT FOR YOUR BRAND</div>
+            <div style="font-size:14px;color:var(--silver-dim);line-height:1.7;">The output is a complete, deployable AI agent system prompt — not a template, not a generic script. It reflects your specific objection language, your booking logic, your escalation rules, and your culture. This is what gets loaded into your AI call center platform.</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:16px;background:var(--navy2);border:1px solid var(--border2);border-radius:4px;padding:18px 20px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--blue-glow);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--blue);flex-shrink:0;">4</div>
+          <div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.06em;color:var(--silver);margin-bottom:5px;">YOUR AGENT IS TESTED, CALIBRATED, AND LAUNCHED</div>
+            <div style="font-size:14px;color:var(--silver-dim);line-height:1.7;">Your AI partner runs the agent through a QA rubric built from this same document — validating that it handles objections your way, books with your logic, and escalates at your thresholds. You review and approve before a single live call is handled.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 5 layers explained -->
+    <div style="margin-bottom:36px;">
+      <div class="eyebrow" style="margin-bottom:16px;">What each layer becomes in your agent</div>
+      <div style="display:grid;gap:8px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;background:var(--navy2);border-radius:3px;border:1px solid var(--border2);">
+          <div style="padding:3px 9px;border-radius:2px;background:rgba(46,155,245,0.1);border:1px solid rgba(46,155,245,0.25);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;color:#2E9BF5;flex-shrink:0;letter-spacing:.08em;">L1</div>
+          <div><span style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--silver);letter-spacing:.05em;">VOICE &amp; TONE</span><span style="font-size:13px;color:var(--silver-dim);"> → The agent's greeting, energy, and language rules. How it sounds on call one, and every call after.</span></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;background:var(--navy2);border-radius:3px;border:1px solid var(--border2);">
+          <div style="padding:3px 9px;border-radius:2px;background:rgba(91,184,255,0.1);border:1px solid rgba(91,184,255,0.25);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;color:#5BB8FF;flex-shrink:0;letter-spacing:.08em;">L2</div>
+          <div><span style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--silver);letter-spacing:.05em;">OBJECTION HANDLING</span><span style="font-size:13px;color:var(--silver-dim);"> → Exact rebuttal scripts, trust sequences, and emotional calibration logic trained on your best closer's language.</span></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;background:var(--navy2);border-radius:3px;border:1px solid var(--border2);">
+          <div style="padding:3px 9px;border-radius:2px;background:rgba(136,153,170,0.1);border:1px solid rgba(136,153,170,0.25);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;color:#8899AA;flex-shrink:0;letter-spacing:.08em;">L3</div>
+          <div><span style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--silver);letter-spacing:.05em;">BOOKING LOGIC</span><span style="font-size:13px;color:var(--silver-dim);"> → The agent's decision tree for scheduling — which slots to offer, what data to collect, how to close and reduce no-shows.</span></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;background:var(--navy2);border-radius:3px;border:1px solid var(--border2);">
+          <div style="padding:3px 9px;border-radius:2px;background:rgba(26,111,191,0.1);border:1px solid rgba(26,111,191,0.3);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;color:#5BB8FF;flex-shrink:0;letter-spacing:.08em;">L4</div>
+          <div><span style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--silver);letter-spacing:.05em;">JOB KNOWLEDGE</span><span style="font-size:13px;color:var(--silver-dim);"> → Triage rules, safety escalation triggers, job type descriptions, and out-of-scope handling — so the agent qualifies correctly every time.</span></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;background:var(--navy2);border-radius:3px;border:1px solid var(--border2);">
+          <div style="padding:3px 9px;border-radius:2px;background:rgba(200,212,224,0.08);border:1px solid rgba(200,212,224,0.2);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;color:#C8D4E0;flex-shrink:0;letter-spacing:.08em;">L5</div>
+          <div><span style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--silver);letter-spacing:.05em;">CULTURE &amp; VALUES</span><span style="font-size:13px;color:var(--silver-dim);"> → The agent's identity — ownership behaviors, recovery language, membership pitch timing, and the one rule that makes your best CSR irreplaceable.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- important note -->
+    <div style="background:var(--navy3);border:1px solid var(--blue-line);border-radius:4px;padding:18px 20px;margin-bottom:36px;">
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="flex-shrink:0;margin-top:1px;"><circle cx="9" cy="9" r="8" stroke="#2E9BF5" stroke-width="1.2"/><line x1="9" y1="8" x2="9" y2="13" stroke="#2E9BF5" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="5.5" r="1" fill="#2E9BF5"/></svg>
+        <div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--blue-bright);margin-bottom:5px;">KEEP THIS DOCUMENT SECURE</div>
+          <div style="font-size:13px;color:var(--silver-dim);line-height:1.7;">This PDF contains your competitive playbook — your pricing logic, objection scripts, and call center strategy. Share it only with your OpsVelocity implementation team and designated AI partners. Do not distribute publicly.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- close note -->
+    <p style="font-size:14px;color:var(--muted);text-align:center;line-height:1.7;">Questions? Contact your OpsVelocity OS implementation team.<br>You can now close this tab.</p>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-logo">Ops<span>Velocity</span> OS</div>
+  <div class="footer-text">Confidential</div>
+</div>
+
+</div><!-- .app -->
+
+<script>
+const LAYERS=[
+  {label:"L1",name:"Voice & Tone",sub:"How this company sounds on every call",
+   questions:[
+    {q:"When a customer calls in, what's the very first impression you want them to have — before you even solve anything?",hint:"Listen for: warmth, confidence, professionalism, speed"},
+    {q:"Walk me through how your best CSR answers the phone right now. What do they say, and what's the energy?",hint:"Capture exact phrasing, greeting style, pace"},
+    {q:"What words or phrases do your customers use that you NEVER want your team to repeat or match?",hint:"Negative language, competitor names, discount framing"},
+    {q:"If your brand were a person, how would you describe their personality in 3 words?",hint:"This becomes the tone anchor for the AI agent"},
+    {q:"What's the single biggest thing that makes customers call back to complain about how they were treated on the phone?",hint:"Anti-pattern gold — captures what to avoid"}
+  ]},
+  {label:"L2",name:"Objection Handling",sub:"How top agents turn skeptics into booked jobs",
+   questions:[
+    {q:"What are the top 3 reasons a caller gives for NOT booking on the first call?",hint:"Price, timing, trust, 'need to check with spouse' — capture all variants"},
+    {q:"What does your best closer say when someone says 'your price is too high'?",hint:"Exact language matters — try to give the script"},
+    {q:"How do you build trust with a first-time caller who has never used you before?",hint:"Reviews, guarantees, technician intro, transparency"},
+    {q:"What's your offer structure — dispatch fee, free estimates, membership discounts? How should the CSR frame this?",hint:"Pricing logic that converts"},
+    {q:"What do your top agents say differently when the customer is stressed versus just shopping around?",hint:"Emotional calibration language"}
+  ]},
+  {label:"L3",name:"Booking Logic",sub:"Converting intent into confirmed appointments",
+   questions:[
+    {q:"What's your current booking rate target — and what does your best CSR actually hit?",hint:"Benchmark to calibrate urgency in the agent"},
+    {q:"Walk me through your scheduling windows. How does a CSR decide which slot to offer first?",hint:"AM/PM, same-day, next-day, urgency tiers"},
+    {q:"What information does the CSR need to collect before confirming a booking?",hint:"Address, system age, issue description, access, contact — required vs optional"},
+    {q:"How do you handle it when you have no same-day availability but the customer needs it now?",hint:"Waitlist, emergency premium, referral protocol"},
+    {q:"What's your close? What does the agent say in the final 30 seconds to confirm and reduce no-shows?",hint:"Confirmation language, reminder opt-in, technician intro"}
+  ]},
+  {label:"L4",name:"Job Knowledge",sub:"Qualifying the job correctly before dispatch",
+   questions:[
+    {q:"What are the 5 most common job types your CSRs book, and how should they describe each to the customer?",hint:"Tune-up vs repair vs replacement vs emergency vs maintenance"},
+    {q:"What questions should the CSR always ask to qualify the urgency of a call correctly?",hint:"Safety flags, system age, symptom description, brand/model"},
+    {q:"What are the red-flag situations where the CSR should escalate to a dispatcher or manager immediately?",hint:"Gas leaks, no heat in winter, safety hazards, elderly customer alone"},
+    {q:"Are there job types or situations you do NOT book — and how should the CSR handle those calls?",hint:"Out of service area, commercial-only, competitor warranties"},
+    {q:"How much technical detail should the CSR use when describing what a tech will do on the job?",hint:"Calibrate jargon level — some customers want detail, others simplicity"}
+  ]},
+  {label:"L5",name:"Culture & Values",sub:"What separates a great CSR from a brand ambassador",
+   questions:[
+    {q:"Tell me about your single best CSR — what do they do that no one taught them?",hint:"Unwritten gold — behaviors worth codifying"},
+    {q:"What does 'taking ownership' of a call look like at your company?",hint:"Never transferring blame, following up, staying on the call"},
+    {q:"How do your CSRs handle an angry customer who had a bad experience with a previous tech?",hint:"Recovery language, escalation path, empathy framework"},
+    {q:"What's your membership or maintenance agreement pitch — and when in the call does it happen?",hint:"Revenue expansion behavior built into every call"},
+    {q:"If you could train every new CSR on ONE thing in the first week that would make the biggest difference — what is it?",hint:"Core insight that anchors the whole agent identity"}
+  ]}
+];
+
+const QUESTIONS=[];
+LAYERS.forEach((l,li)=>l.questions.forEach((q,qi)=>QUESTIONS.push({...q,layerIdx:li,layerLabel:l.label,layerName:l.name,layerSub:l.sub,globalIdx:QUESTIONS.length})));
+
+const DOT_COLORS=['#2E9BF5','#5BB8FF','#8899AA','#1A6FBF','#C8D4E0'];
+
+let S={currentQ:0,answers:{},showingTransition:false,selectedTrade:'',recordingActive:false,recognition:null};
+
+function selectTrade(btn,trade){
+  document.querySelectorAll('.trade-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  S.selectedTrade=trade;
+}
+
+function startSurvey(){
+  document.getElementById('screen-intro').classList.remove('active');
+  document.getElementById('screen-survey').classList.add('active');
+  S.currentQ=0;
+  showLayerTransition(0);
+  updateProgress();
+}
+
+function showLayerTransition(li){
+  const l=LAYERS[li];
+  S.showingTransition=true;
+  document.getElementById('lt-badge').textContent='Layer '+(li+1)+' of 5';
+  document.getElementById('lt-num').textContent=l.label;
+  document.getElementById('lt-title').textContent=l.name;
+  document.getElementById('lt-sub').textContent=l.sub;
+  document.getElementById('layer-transition').classList.add('active');
+  document.getElementById('q-card').style.display='none';
+  window.scrollTo(0,0);
+}
+
+function dismissTransition(){
+  S.showingTransition=false;
+  document.getElementById('layer-transition').classList.remove('active');
+  document.getElementById('q-card').style.display='block';
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q=QUESTIONS[S.currentQ];
+  document.getElementById('q-layer-num').textContent=q.layerLabel;
+  document.getElementById('q-layer-name').textContent=q.layerName;
+  document.getElementById('q-of').textContent=(S.currentQ+1)+' of 25';
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-hint').innerHTML='<strong>Probe for:</strong> '+q.hint;
+  document.getElementById('answer-field').value=S.answers[S.currentQ]||'';
+  document.getElementById('voice-preview').textContent=S.answers[S.currentQ]||'Your spoken answer will appear here...';
+  document.getElementById('back-btn').disabled=S.currentQ===0;
+  updateProgress();
+  setMode('text');
+  window.scrollTo(0,0);
+}
+
+function updateProgress(){
+  document.getElementById('progress-fill').style.width=(S.currentQ/25*100)+'%';
+}
+
+function setMode(mode){
+  const tb=document.getElementById('mode-text-btn');
+  const vb=document.getElementById('mode-voice-btn');
+  const tm=document.getElementById('text-mode');
+  const vp=document.getElementById('voice-panel');
+  if(mode==='text'){
+    tb.classList.add('active');vb.classList.remove('active');
+    tm.style.display='block';vp.classList.remove('open');
+    stopRecording();
+  } else {
+    vb.classList.add('active');tb.classList.remove('active');
+    tm.style.display='none';vp.classList.add('open');
+  }
+}
+
+function toggleRecording(){ S.recordingActive?stopRecording():startRecording(); }
+
+function startRecording(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){document.getElementById('voice-status').textContent='Not supported — use text mode';return;}
+  S.recognition=new SR();
+  S.recognition.continuous=true;
+  S.recognition.interimResults=true;
+  S.recognition.lang='en-US';
+  let final=S.answers[S.currentQ]||'';
+  S.recognition.onresult=e=>{
+    let interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) final+=e.results[i][0].transcript+' ';
+      else interim+=e.results[i][0].transcript;
+    }
+    const full=final+interim;
+    document.getElementById('voice-preview').textContent=full;
+    document.getElementById('answer-field').value=full;
+    S.answers[S.currentQ]=full;
+  };
+  S.recognition.onerror=()=>stopRecording();
+  S.recognition.onend=()=>stopRecording();
+  S.recognition.start();
+  S.recordingActive=true;
+  document.getElementById('mic-btn').classList.add('recording');
+  document.getElementById('voice-status').textContent='Recording...';
+  document.getElementById('voice-status').classList.add('active');
+}
+
+function stopRecording(){
+  if(S.recognition){try{S.recognition.stop();}catch(e){}S.recognition=null;}
+  S.recordingActive=false;
+  document.getElementById('mic-btn').classList.remove('recording');
+  const vs=document.getElementById('voice-status');
+  vs.textContent='Tap to record';
+  vs.classList.remove('active');
+}
+
+function saveAnswer(){
+  const v=document.getElementById('answer-field').value.trim();
+  if(v)S.answers[S.currentQ]=v;
+}
+
+function nextQuestion(){
+  saveAnswer();stopRecording();
+  if(S.currentQ>=24){showSubmit();return;}
+  const cl=QUESTIONS[S.currentQ].layerIdx;
+  S.currentQ++;
+  const nl=QUESTIONS[S.currentQ].layerIdx;
+  if(nl!==cl) showLayerTransition(nl);
+  else renderQuestion();
+}
+
+function skipQuestion(){
+  stopRecording();
+  if(S.currentQ>=24){showSubmit();return;}
+  const cl=QUESTIONS[S.currentQ].layerIdx;
+  S.currentQ++;
+  const nl=QUESTIONS[S.currentQ].layerIdx;
+  if(nl!==cl) showLayerTransition(nl);
+  else renderQuestion();
+}
+
+function goBack(){
+  saveAnswer();stopRecording();
+  if(S.currentQ>0){S.currentQ--;renderQuestion();}
+}
+
+function showSubmit(){
+  document.getElementById('screen-survey').classList.remove('active');
+  document.getElementById('screen-submit').classList.add('active');
+  renderPreview();
+  window.scrollTo(0,0);
+}
+
+function goToSurvey(){
+  document.getElementById('screen-submit').classList.remove('active');
+  document.getElementById('screen-survey').classList.add('active');
+  renderQuestion();
+}
+
+function renderPreview(){
+  document.getElementById('submit-preview').innerHTML=LAYERS.map((l,li)=>{
+    const answered=l.questions.filter((_,qi)=>(S.answers[li*5+qi]||'').trim()).length;
+    return`<div class="submit-row">
+      <div class="submit-dot" style="background:${DOT_COLORS[li]}"></div>
+      <div style="flex:1">
+        <div class="submit-lbl">${l.label} · ${l.name}</div>
+        <div class="submit-val ${answered===0?'empty':''}">${answered===0?'No answers captured':answered+' of 5 answered'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function submitSurvey(){
+  const btn=document.getElementById('submit-btn');
+  btn.disabled=true;btn.textContent='Submitting...';
+  const co=document.getElementById('co-name').value||'[Company]';
+  const gm=document.getElementById('gm-name').value||'[GM]';
+  const market=document.getElementById('co-market').value||'[Market]';
+  const trade=S.selectedTrade||'[Trade]';
+  const email=document.getElementById('gm-email').value||'';
+  let body=`OpsVelocity OS · CSR Agent Survey\nCompany: ${co} | GM: ${gm} | Trade: ${trade} | Market: ${market}\nSubmitted: ${new Date().toLocaleString()}\nReply to: ${email||'Not provided'}\n${'='.repeat(60)}\n\n`;
+  LAYERS.forEach((l,li)=>{
+    body+=`${l.label}: ${l.name.toUpperCase()}\n${'-'.repeat(40)}\n`;
+    l.questions.forEach((q,qi)=>{
+      const idx=li*5+qi;
+      body+=`Q${idx+1}: ${q.q}\nA: ${S.answers[idx]||'[Not answered]'}\n\n`;
+    });
+    body+='\n';
+  });
+  const ENDPOINT='https://formspree.io/f/YOUR_FORM_ID';
+  try{
+    await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({company:co,gm,trade,market,reply_to:email,survey_responses:body})});
+  }catch(e){}
+  showDone();
+}
+
+function showDone(){
+  document.getElementById('screen-submit').classList.remove('active');
+  document.getElementById('screen-done').classList.add('active');
+  document.getElementById('progress-fill').style.width='100%';
+  window.scrollTo(0,0);
+function downloadPDF(){
+  const btn=document.getElementById('pdf-btn');
+  btn.disabled=true;
+  btn.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="white" stroke-width="1.5" stroke-dasharray="8 4"/></svg> Generating...';
+
+  const co=document.getElementById('co-name').value||'Company';
+  const gm=document.getElementById('gm-name').value||'GM';
+  const market=document.getElementById('co-market').value||'';
+  const trade=S.selectedTrade||'';
+  const date=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const filename=`OpsVelocity_CSR_Survey_${co.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.pdf`;
+
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'pt',format:'letter'});
+
+  const PW=612, PH=792;
+  const ML=48, MR=48, MT=48;
+  const CW=PW-ML-MR;
+
+  const NAVY='#060D1A';
+  const NAVY2='#0A1628';
+  const NAVY3='#0F1F38';
+  const BLUE='#2E9BF5';
+  const BLUE_DIM='#1A6FBF';
+  const SILVER='#C8D4E0';
+  const SILVER_DIM='#8899AA';
+  const WHITE='#FFFFFF';
+  const MUTED='#5A7090';
+  const L_COLORS=['#2E9BF5','#5BB8FF','#8899AA','#1A6FBF','#C8D4E0'];
+
+  function hexToRgb(hex){
+    const r=parseInt(hex.slice(1,3),16);
+    const g=parseInt(hex.slice(3,5),16);
+    const b=parseInt(hex.slice(5,7),16);
+    return[r,g,b];
+  }
+
+  function setFill(hex){ const[r,g,b]=hexToRgb(hex); doc.setFillColor(r,g,b); }
+  function setDraw(hex){ const[r,g,b]=hexToRgb(hex); doc.setDrawColor(r,g,b); }
+  function setTextC(hex){ const[r,g,b]=hexToRgb(hex); doc.setTextColor(r,g,b); }
+
+  let totalPages=1;
+  // Pre-calculate pages for footer
+  // We'll add page numbers after rendering
+
+  function addPage(){
+    doc.addPage();
+    // dark bg
+    setFill(NAVY);
+    doc.rect(0,0,PW,PH,'F');
+    totalPages++;
+  }
+
+  // ── COVER PAGE ──
+  setFill(NAVY);
+  doc.rect(0,0,PW,PH,'F');
+
+  // top accent bar
+  setFill(BLUE_DIM);
+  doc.rect(0,0,PW,4,'F');
+
+  // left accent stripe
+  setFill(BLUE);
+  doc.rect(ML,MT,3,120,'F');
+
+  // OPSVELOCITY OS wordmark
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(28);
+  setTextC(WHITE);
+  doc.text('OpsVelocity',ML+14,MT+32);
+  doc.setFontSize(28);
+  setTextC(BLUE);
+  doc.text('OS',ML+14+doc.getTextWidth('OpsVelocity')+4,MT+32);
+
+  // subtitle
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(10);
+  setTextC(MUTED);
+  doc.text('CSR AGENT BUILDER',ML+14,MT+48);
+
+  // divider
+  setDraw(BLUE_DIM);
+  doc.setLineWidth(0.5);
+  doc.line(ML,MT+62,PW-MR,MT+62);
+
+  // main title
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(36);
+  setTextC(WHITE);
+  doc.text('GM Survey',ML,MT+110);
+  doc.setFontSize(36);
+  setTextC(SILVER_DIM);
+  doc.text('Response Record',ML,MT+150);
+
+  // meta block
+  const metaY=MT+185;
+  setFill(NAVY2);
+  doc.roundedRect(ML,metaY,CW,110,4,4,'F');
+  setDraw('#1A2840');
+  doc.setLineWidth(0.5);
+  doc.roundedRect(ML,metaY,CW,110,4,4,'S');
+
+  const metaItems=[
+    ['Company',co],
+    ['GM / Respondent',gm],
+    ['Trade',trade||'—'],
+    ['Market',market||'—'],
+    ['Date Submitted',date]
+  ];
+
+  doc.setFontSize(9);
+  metaItems.forEach((item,i)=>{
+    const row=i<3?i:i;
+    const col=i<3?0:1;
+    const baseX=col===0?ML+16:ML+CW/2+8;
+    const baseY=metaY+20+(Math.floor(i/2)*26)+(i%2===0&&i>0?0:0);
+    // Actually lay them out in two columns of rows
+    const x=ML+16+(col*(CW/2));
+    const y=metaY+24+(Math.floor(i/2)*28);
+    setTextC(MUTED);
+    doc.setFont('helvetica','normal');
+    doc.text(item[0].toUpperCase(),x,y);
+    setTextC(SILVER);
+    doc.setFont('helvetica','bold');
+    doc.text(item[1],x,y+13);
+  });
+
+  // layer overview chips
+  const chipY=metaY+130;
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(8);
+  setTextC(MUTED);
+  doc.text('5 FOUNDATIONAL LAYERS',ML,chipY+10);
+
+  LAYERS.forEach((l,i)=>{
+    const chipX=ML+(i*(CW/5));
+    const [r,g,b]=hexToRgb(L_COLORS[i]);
+    doc.setFillColor(r,g,b,0.15);
+    setFill(NAVY3);
+    doc.roundedRect(chipX,chipY+16,CW/5-6,22,2,2,'F');
+    const[cr,cg,cb]=hexToRgb(L_COLORS[i]);
+    doc.setTextColor(cr,cg,cb);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(8);
+    const label=l.label+' '+l.name;
+    const lw=doc.getTextWidth(label);
+    const cx=chipX+(CW/5-6)/2-lw/2;
+    doc.text(label,cx>chipX?cx:chipX+4,chipY+31);
+  });
+
+  // answered count summary
+  const answeredTotal=Object.keys(S.answers).filter(k=>(S.answers[k]||'').trim()).length;
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(10);
+  setTextC(SILVER_DIM);
+  doc.text(`${answeredTotal} of 25 questions answered`,ML,chipY+58);
+
+  // confidential footer on cover
+  setDraw(BLUE_DIM);
+  doc.setLineWidth(0.3);
+  doc.line(ML,PH-44,PW-MR,PH-44);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8);
+  setTextC(MUTED);
+  doc.text('OpsVelocity OS · Confidential · Not for distribution',ML,PH-30);
+  doc.text('Page 1',PW-MR-doc.getTextWidth('Page 1'),PH-30);
+
+  // ── RESPONSE PAGES ──
+  let pageNum=2;
+
+  LAYERS.forEach((layer,li)=>{
+    addPage();
+
+    // layer header bar
+    const[lr,lg,lb]=hexToRgb(L_COLORS[li]);
+    doc.setFillColor(lr,lg,lb);
+    doc.rect(0,0,PW,3,'F');
+
+    // layer badge
+    doc.setFillColor(lr,lg,lb,0.12);
+    setFill(NAVY3);
+    doc.roundedRect(ML,MT,60,20,2,2,'F');
+    doc.setTextColor(lr,lg,lb);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(9);
+    doc.text(layer.label,ML+6,MT+13);
+
+    // layer title
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(20);
+    setTextC(WHITE);
+    doc.text(layer.name,ML+72,MT+15);
+
+    // layer sub
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(9);
+    setTextC(SILVER_DIM);
+    doc.text(layer.sub,ML+72,MT+28);
+
+    // divider
+    doc.setTextColor(lr,lg,lb);
+    doc.setLineWidth(0.8);
+    doc.line(ML,MT+38,PW-MR,MT+38);
+
+    let y=MT+58;
+
+    layer.questions.forEach((q,qi)=>{
+      const globalIdx=li*5+qi;
+      const answer=(S.answers[globalIdx]||'').trim()||'— No response provided —';
+
+      // check if we need a new page
+      const answerLines=doc.splitTextToSize(answer,CW-24);
+      const blockH=14+12+answerLines.length*13+24;
+      if(y+blockH>PH-60){
+        // footer on current page
+        setDraw(BLUE_DIM);
+        doc.setLineWidth(0.3);
+        doc.line(ML,PH-44,PW-MR,PH-44);
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(8);
+        setTextC(MUTED);
+        doc.text(`OpsVelocity OS · ${co} · ${date}`,ML,PH-30);
+        doc.text(`Page ${pageNum}`,PW-MR-doc.getTextWidth(`Page ${pageNum}`),PH-30);
+        addPage();
+        pageNum++;
+        // layer indicator on continuation page
+        doc.setTextColor(lr,lg,lb);
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(9);
+        doc.text(`${layer.label} · ${layer.name} (continued)`,ML,MT+14);
+        doc.setLineWidth(0.4);
+        doc.line(ML,MT+20,PW-MR,MT+20);
+        y=MT+36;
+      }
+
+      // Q number badge
+      doc.setTextColor(lr,lg,lb);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(9);
+      doc.text(`Q${globalIdx+1}`,ML,y+10);
+
+      // question text
+      const qLines=doc.splitTextToSize(q.q,CW-32);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(10);
+      setTextC(SILVER);
+      doc.text(qLines,ML+26,y+10);
+      y+=qLines.length*13+6;
+
+      // answer box
+      setFill(NAVY2);
+      doc.roundedRect(ML,y,CW,answerLines.length*13+16,2,2,'F');
+      setDraw(NAVY3);
+      doc.setLineWidth(0.4);
+      doc.roundedRect(ML,y,CW,answerLines.length*13+16,2,2,'S');
+
+      // left accent line on answer
+      doc.setTextColor(lr,lg,lb);
+      doc.setLineWidth(1.5);
+      doc.line(ML+6,y+4,ML+6,y+answerLines.length*13+12);
+
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(10);
+      const isBlank=!(S.answers[globalIdx]||'').trim();
+      setTextC(isBlank?MUTED:WHITE);
+      doc.text(answerLines,ML+16,y+13);
+      y+=answerLines.length*13+28;
+    });
+
+    // page footer
+    setDraw(BLUE_DIM);
+    doc.setLineWidth(0.3);
+    doc.line(ML,PH-44,PW-MR,PH-44);
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(8);
+    setTextC(MUTED);
+    doc.text(`OpsVelocity OS · ${co} · ${date}`,ML,PH-30);
+    doc.text(`Page ${pageNum}`,PW-MR-doc.getTextWidth(`Page ${pageNum}`),PH-30);
+    pageNum++;
+  });
+
+  doc.save(filename);
+
+  btn.disabled=false;
+  btn.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Download PDF Copy';
+}
+</script>
+</body>
+</html>
