@@ -265,10 +265,11 @@ input[type="text"]::placeholder { color:var(--muted2); }
   transition:all .15s;
 }
 
-.trade-btn.selected {
-  background:var(--blue-glow);
-  border-color:var(--blue);
-  color:var(--blue-bright);
+.trade-btn.selected,.trade-btn.selected:hover,.trade-btn.selected:focus {
+  background:var(--blue-glow) !important;
+  border-color:var(--blue) !important;
+  color:var(--blue-bright) !important;
+  outline:none;
 }
 
 .btn-primary {
@@ -750,16 +751,16 @@ textarea.answer-field::placeholder { color:var(--muted2); }
         <div class="field-wrap">
           <label class="field-label">Primary Trade</label>
           <div class="trade-select" id="trade-select">
-            <button class="trade-btn" onclick="selectTrade(this,'HVAC')">HVAC</button>
-            <button class="trade-btn" onclick="selectTrade(this,'Plumbing')">Plumbing</button>
-            <button class="trade-btn" onclick="selectTrade(this,'Electrical')">Electrical</button>
-            <button class="trade-btn" onclick="selectTrade(this,'Multi')">Multi</button>
+            <button type="button" class="trade-btn" data-trade="HVAC">HVAC</button>
+            <button type="button" class="trade-btn" data-trade="Plumbing">Plumbing</button>
+            <button type="button" class="trade-btn" data-trade="Electrical">Electrical</button>
+            <button type="button" class="trade-btn" data-trade="Multi">Multi</button>
           </div>
         </div>
       </div>
     </div>
 
-    <button class="btn-primary" onclick="startSurvey()">
+    <button class="btn-primary" id="btn-start">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M9 4l4 4-4 4" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Begin Survey
     </button>
@@ -776,7 +777,7 @@ textarea.answer-field::placeholder { color:var(--muted2); }
       <div class="lt-num" id="lt-num">L1</div>
       <div class="lt-title" id="lt-title">Voice &amp; Tone</div>
       <div class="lt-sub" id="lt-sub">How this company sounds on every call</div>
-      <button class="btn-primary" onclick="dismissTransition()">
+      <button class="btn-primary" id="btn-dismiss">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M8 3l4 4-4 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Start This Layer
       </button>
@@ -796,11 +797,11 @@ textarea.answer-field::placeholder { color:var(--muted2); }
       <div class="q-hint" id="q-hint"></div>
 
       <div class="answer-mode-bar">
-        <button class="mode-btn active" id="mode-text-btn" onclick="setMode('text')">
+        <button class="mode-btn active" id="mode-text-btn">
           <svg class="mode-icon" viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="2" rx="1" fill="currentColor"/><rect x="1" y="6" width="9" height="2" rx="1" fill="currentColor"/><rect x="1" y="10" width="11" height="2" rx="1" fill="currentColor"/></svg>
           Type
         </button>
-        <button class="mode-btn" id="mode-voice-btn" onclick="setMode('voice')">
+        <button class="mode-btn" id="mode-voice-btn">
           <svg class="mode-icon" viewBox="0 0 14 14" fill="none"><rect x="4" y="1" width="6" height="8" rx="3" fill="currentColor"/><path d="M2 7c0 2.76 2.24 5 5 5s5-2.24 5-5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="7" y1="12" x2="7" y2="13.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
           Voice
         </button>
@@ -811,7 +812,7 @@ textarea.answer-field::placeholder { color:var(--muted2); }
       </div>
 
       <div class="voice-panel" id="voice-panel">
-        <div class="mic-btn" id="mic-btn" onclick="toggleRecording()">
+        <div class="mic-btn" id="mic-btn">
           <svg class="mic-svg" viewBox="0 0 30 30" fill="none">
             <rect x="9" y="2" width="12" height="16" rx="6" fill="#2E9BF5"/>
             <path d="M4 14c0 6.07 4.93 11 11 11s11-4.93 11-11" stroke="#5BB8FF" stroke-width="2" stroke-linecap="round"/>
@@ -824,10 +825,10 @@ textarea.answer-field::placeholder { color:var(--muted2); }
       </div>
 
       <div class="nav-row">
-        <button class="btn-ghost" onclick="goBack()" id="back-btn">← Back</button>
+        <button class="btn-ghost" id="back-btn">← Back</button>
         <div style="display:flex;align-items:center;gap:14px;">
-          <button class="skip-link" onclick="skipQuestion()">Skip</button>
-          <button class="btn-primary" onclick="nextQuestion()" id="next-btn">
+          <button class="skip-link" id="btn-skip">Skip</button>
+          <button class="btn-primary" id="next-btn">
             Next
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M8 3l4 4-4 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
@@ -855,11 +856,11 @@ textarea.answer-field::placeholder { color:var(--muted2); }
     </div>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <button class="btn-primary" onclick="submitSurvey()" id="submit-btn">
+      <button class="btn-primary" id="submit-btn">
         <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2 7.5l4 4 7-7" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Submit to OpsVelocity
       </button>
-      <button class="btn-ghost" onclick="goToSurvey()">← Edit answers</button>
+      <button class="btn-ghost" id="btn-edit">← Edit answers</button>
     </div>
   </div>
 </div>
@@ -876,7 +877,7 @@ textarea.answer-field::placeholder { color:var(--muted2); }
       <div class="eyebrow" style="justify-content:center;margin-bottom:8px;">Survey complete</div>
       <div class="section-title">Your responses<br>are submitted.</div>
       <p style="font-size:15px;color:var(--silver-dim);margin-top:14px;line-height:1.75;max-width:480px;">Download your PDF copy below — this document is the raw material that will be used to build the AI brain of your inbound call center agent.</p>
-      <button class="btn-primary" id="pdf-btn" onclick="downloadPDF()" style="margin-top:24px;">
+      <button class="btn-primary" id="pdf-btn" style="margin-top:24px;">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Download PDF Copy
       </button>
@@ -1070,6 +1071,7 @@ function dismissTransition(){
   document.getElementById('layer-transition').classList.remove('active');
   document.getElementById('q-card').style.display='block';
   renderQuestion();
+  wireNavButtons();
 }
 
 function renderQuestion(){
@@ -1085,6 +1087,7 @@ function renderQuestion(){
   updateProgress();
   setMode('text');
   window.scrollTo(0,0);
+  wireNavButtons();
 }
 
 function updateProgress(){
@@ -1516,6 +1519,89 @@ function downloadPDF(){
   btn.disabled=false;
   btn.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Download PDF Copy';
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+
+  // Trade buttons
+  document.querySelectorAll('.trade-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.trade-btn').forEach(function(b) { b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      S.selectedTrade = btn.getAttribute('data-trade');
+    });
+  });
+
+  // Start survey
+  var btnStart = document.getElementById('btn-start');
+  if(btnStart) btnStart.addEventListener('click', startSurvey);
+
+  // Dismiss layer transition
+  var btnDismiss = document.getElementById('btn-dismiss');
+  if(btnDismiss) btnDismiss.addEventListener('click', dismissTransition);
+
+  // Mode buttons
+  var modeText = document.getElementById('mode-text-btn');
+  if(modeText) modeText.addEventListener('click', function() { setMode('text'); });
+  var modeVoice = document.getElementById('mode-voice-btn');
+  if(modeVoice) modeVoice.addEventListener('click', function() { setMode('voice'); });
+
+  // Mic
+  var micBtn = document.getElementById('mic-btn');
+  if(micBtn) micBtn.addEventListener('click', toggleRecording);
+
+  // Navigation
+  var backBtn = document.getElementById('back-btn');
+  if(backBtn) backBtn.addEventListener('click', goBack);
+  var skipBtn = document.getElementById('btn-skip');
+  if(skipBtn) skipBtn.addEventListener('click', skipQuestion);
+  var nextBtn = document.getElementById('next-btn');
+  if(nextBtn) nextBtn.addEventListener('click', nextQuestion);
+
+  // Submit screen
+  var submitBtn = document.getElementById('submit-btn');
+  if(submitBtn) submitBtn.addEventListener('click', submitSurvey);
+  var editBtn = document.getElementById('btn-edit');
+  if(editBtn) editBtn.addEventListener('click', goToSurvey);
+
+  // PDF download
+  var pdfBtn = document.getElementById('pdf-btn');
+  if(pdfBtn) pdfBtn.addEventListener('click', downloadPDF);
+
+});
+
+// Re-wire navigation buttons after each render (they are inside dynamic content)
+function wireNavButtons() {
+  var backBtn = document.getElementById('back-btn');
+  if(backBtn) { backBtn.replaceWith(backBtn.cloneNode(true)); }
+  backBtn = document.getElementById('back-btn');
+  if(backBtn) backBtn.addEventListener('click', goBack);
+
+  var skipBtn = document.getElementById('btn-skip');
+  if(skipBtn) { skipBtn.replaceWith(skipBtn.cloneNode(true)); }
+  skipBtn = document.getElementById('btn-skip');
+  if(skipBtn) skipBtn.addEventListener('click', skipQuestion);
+
+  var nextBtn = document.getElementById('next-btn');
+  if(nextBtn) { nextBtn.replaceWith(nextBtn.cloneNode(true)); }
+  nextBtn = document.getElementById('next-btn');
+  if(nextBtn) nextBtn.addEventListener('click', nextQuestion);
+
+  var modeText = document.getElementById('mode-text-btn');
+  if(modeText) { modeText.replaceWith(modeText.cloneNode(true)); }
+  modeText = document.getElementById('mode-text-btn');
+  if(modeText) modeText.addEventListener('click', function() { setMode('text'); });
+
+  var modeVoice = document.getElementById('mode-voice-btn');
+  if(modeVoice) { modeVoice.replaceWith(modeVoice.cloneNode(true)); }
+  modeVoice = document.getElementById('mode-voice-btn');
+  if(modeVoice) modeVoice.addEventListener('click', function() { setMode('voice'); });
+
+  var micBtn = document.getElementById('mic-btn');
+  if(micBtn) { micBtn.replaceWith(micBtn.cloneNode(true)); }
+  micBtn = document.getElementById('mic-btn');
+  if(micBtn) micBtn.addEventListener('click', toggleRecording);
+}
+
 </script>
 </body>
 </html>
